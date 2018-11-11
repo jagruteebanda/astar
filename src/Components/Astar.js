@@ -36,7 +36,16 @@ class Astar extends Component {
             }
       }
 
+      clearMaze() {
+            for (let i = 0; i < this.state.maze.length; i++) {
+                  for (let j = 0; j < this.state.maze[0].length; j++) {
+                        document.getElementById(`node_${i}_${j}`).style.backgroundColor = '#ffffff';
+                  }
+            }
+      }
+
       astarSearch() {
+            this.clearMaze();
             let closedList = astar(this.state.maze, this.state.startNode, this.state.lastNode);
             let k;
             for (let i = 0; i < closedList.length; i++) {
@@ -47,18 +56,14 @@ class Astar extends Component {
             }
             setTimeout(() => {
                   this.setState({ cost: closedList.length - 1 });
+                  document.getElementById(`node_${this.state.startNode.node[0]}_${this.state.startNode.node[1]}`).style.backgroundColor = '#ba124c';
+                  document.getElementById(`node_${this.state.lastNode.node[0]}_${this.state.lastNode.node[1]}`).style.backgroundColor = '#1339b7';
             }, 1000 * (k + 1));
       }
 
       handleModal() {
             this.setState({ modalOpen: !this.state.modalOpen });
       }
-
-      // astar() {
-      //       let openList = [];
-      //       let closedList = [];
-      //       openList.push(this.state.startNode);
-      // }
 
       selectNode(type) {
             this.setState({ modalOpen: true, nodeType: type });
@@ -96,7 +101,19 @@ class Astar extends Component {
       }
 
       createGrid() {
-            let maze = []
+            this.clearMaze();
+            this.setState({
+                  lastNode: {
+                        node: [this.state.gridRows - 1, this.state.gridColumns - 1],
+                        f: 0,
+                        g: 0,
+                        h: 0,
+                        parent: null
+                  }
+            });
+            document.getElementById(`node_${this.state.startNode.node[0]}_${this.state.startNode.node[1]}`).style.backgroundColor = '#ba124c';
+            document.getElementById(`node_${this.state.lastNode.node[0]}_${this.state.lastNode.node[1]}`).style.backgroundColor = '#1339b7';
+            let maze = [];
             for (let i = 0; i < this.state.gridRows; i++) {
                   maze[i] = []
                   for (let j = 0; j < this.state.gridColumns; j++) {

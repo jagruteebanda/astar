@@ -21,8 +21,8 @@ function findSuccessors(maze, q, lastNode) {
     for (let i = q.node[0] - 1; i <= q.node[0] + 1; i++) {
         for (let j = q.node[1] - 1; j <= q.node[1] + 1; j++) {
             if (JSON.stringify([i, j]) !== JSON.stringify(q.node)) {
-                if ((i >= 0) && (i < maze.length) && (j >= 0) && (j < maze[0].length)) {
-                    let g = q.g + 1;
+                if ((i >= 0) && (i < maze.length) && (j >= 0) && (j < maze[0].length) && maze[i][j] != 8) {
+                    let g = q.g + 0.1;
                     // console.log(lastNode.node[0], lastNode.node[1]);
                     let h = Math.sqrt(Math.pow(i - lastNode.node[0], 2) + Math.pow(j - lastNode.node[1], 2)); // Euclidean distance
                     let f = g + h;
@@ -39,6 +39,7 @@ function findSuccessors(maze, q, lastNode) {
         }
     }
     // console.log("\n");
+    successors = _.sortBy(successors, (o) => o.f);
     return successors;
 }
 
@@ -59,7 +60,7 @@ function astar(maze, startNode, lastNode) {
     /*
     ** 3. while the open list is not empty
     */
-   let flag = null;
+    let flag = null;
     while (openList.length > 0) {
 
         /* 
@@ -76,7 +77,7 @@ function astar(maze, startNode, lastNode) {
         ** b. pop 'q' off the open list
         */
         let q = openList.shift();
-        // console.log("q: ", q);
+        // console.log("\nq: ", q);
 
         /*
         ** c. generate q's 8 successors and set their parents to q
@@ -89,13 +90,13 @@ function astar(maze, startNode, lastNode) {
             let o = successorsQ[i];
             // console.log(JSON.stringify(o.node) == JSON.stringify(lastNode.node))
             if (JSON.stringify(o.node) === JSON.stringify(lastNode.node)) {
-                console.log("Found last node: ", o.node, " wtith cost: ", o.f);
+                console.log("Found last node: ", o.node, " with cost: ", closedList.length);
                 flag = o;
                 break;
-            } else if (_.find(openList, (n) => { if (n.f < o.f && n.node === o.node) return n.node; })) {
+            } else if (_.find(openList, (n) => { if (JSON.stringify(n.node) === JSON.stringify(o.node)) return true; })) {
                 // console.log("found in open list", o);
                 continue;
-            } else if (_.find(closedList, (n) => { if (n.f < o.f && n.node === o.node) return n.node; })) {
+            } else if (_.find(closedList, (n) => { if (JSON.stringify(n.node) === JSON.stringify(o.node)) return true; })) {
                 // console.log("found in closed list", o);
                 continue;
             } else {
@@ -107,7 +108,7 @@ function astar(maze, startNode, lastNode) {
         closedList.push(q);
         if (flag !== null) {
             closedList.push(flag);
-            // console.log("Closed List: ", closedList);
+            console.log("Closed List: ", closedList);
             return closedList;
             // break;
         }
@@ -129,10 +130,10 @@ function astar(maze, startNode, lastNode) {
 // let maze = [
 //     [0, 0, 0, 0, 0],
 //     [0, 0, 0, 0, 0],
+//     [8, 8, 8, 0, 0],
 //     [0, 0, 0, 0, 0],
 //     [0, 0, 0, 0, 0],
-//     [0, 0, 0, 0, 0],
-//     [0, 0, 0, 0, 0],
+//     [0, 0, 8, 8, 8],
 //     [0, 0, 0, 0, 0],
 //     [0, 0, 0, 0, 0]
 // ];
@@ -140,13 +141,13 @@ function astar(maze, startNode, lastNode) {
 // astar(
 //     maze,
 //     {
-//         node: [7, 2],
+//         node: [0, 0],
 //         f: 0,
 //         g: 0,
 //         h: 0,
 //         parent: null
 //     }, {
-//         node: [0, 4],
+//         node: [7, 4],
 //         f: 0,
 //         g: 0,
 //         h: 0,

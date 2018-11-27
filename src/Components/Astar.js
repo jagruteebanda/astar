@@ -3,6 +3,8 @@ import '../styles/Astar.css';
 
 import astar from '../astar';
 
+let x;
+
 class Astar extends Component {
       constructor(props) {
             super(props);
@@ -37,6 +39,7 @@ class Astar extends Component {
       }
 
       clearMaze() {
+            clearTimeout(x);
             for (let i = 0; i < this.state.maze.length; i++) {
                   for (let j = 0; j < this.state.maze[0].length; j++) {
                         document.getElementById(`node_${i}_${j}`).style.backgroundColor = '#ffffff';
@@ -45,20 +48,22 @@ class Astar extends Component {
       }
 
       astarSearch() {
-            this.clearMaze();
+            // this.clearMaze();
             let closedList = astar(this.state.maze, this.state.startNode, this.state.lastNode);
             let k;
             for (let i = 0; i < closedList.length; i++) {
                   k = i;
-                  setTimeout(function () {
-                        document.getElementById(`node_${closedList[i].node[0]}_${closedList[i].node[1]}`).style.backgroundColor = '#ebebe0';
+                  x = setTimeout(() => {
+                        if (JSON.stringify(this.state.startNode.node) !== JSON.stringify(closedList[i].node) && JSON.stringify(this.state.lastNode.node) !== JSON.stringify(closedList[i].node))
+                              document.getElementById(`node_${closedList[i].node[0]}_${closedList[i].node[1]}`).style.backgroundColor = '#ebebe0';
                   }, 1000 * (k + 1));
             }
-            setTimeout(() => {
-                  this.setState({ cost: closedList.length - 1 });
-                  document.getElementById(`node_${this.state.startNode.node[0]}_${this.state.startNode.node[1]}`).style.backgroundColor = '#ba124c';
-                  document.getElementById(`node_${this.state.lastNode.node[0]}_${this.state.lastNode.node[1]}`).style.backgroundColor = '#1339b7';
-            }, 1000 * (k + 1));
+            this.setState({ cost: closedList.length - 1 });
+            // setTimeout(() => {
+                  
+            //       document.getElementById(`node_${this.state.startNode.node[0]}_${this.state.startNode.node[1]}`).style.backgroundColor = '#ba124c';
+            //       document.getElementById(`node_${this.state.lastNode.node[0]}_${this.state.lastNode.node[1]}`).style.backgroundColor = '#1339b7';
+            // }, 1000 * (k + 1));
       }
 
       handleModal() {
@@ -70,6 +75,7 @@ class Astar extends Component {
       }
 
       handleNodeClick(i, j) {
+            console.log(i, j, this.state.nodeType);
             switch (this.state.nodeType) {
                   case 'start': {
                         if (this.state.startNode.node === null) {
@@ -78,7 +84,6 @@ class Astar extends Component {
                               document.getElementById(`node_${this.state.startNode.node[0]}_${this.state.startNode.node[1]}`).style.backgroundColor = '#ffffff';
                               document.getElementById(`node_${i}_${j}`).style.backgroundColor = '#ba124c';
                         }
-                        this.state.nodeType = null;
                         this.state.startNode.node = [i, j];
                         break;
                   }
@@ -89,8 +94,14 @@ class Astar extends Component {
                               document.getElementById(`node_${this.state.lastNode.node[0]}_${this.state.lastNode.node[1]}`).style.backgroundColor = '#ffffff';
                               document.getElementById(`node_${i}_${j}`).style.backgroundColor = '#1339b7';
                         }
-                        this.state.nodeType = null;
                         this.state.lastNode.node = [i, j];
+                        break;
+                  }
+                  case 'block': {
+                        document.getElementById(`node_${i}_${j}`).style.backgroundColor = '#333333';
+                        let maze = this.state.maze;
+                        maze[i][j] = 8;
+                        this.setState({ maze });
                         break;
                   }
                   default: {
@@ -136,6 +147,8 @@ class Astar extends Component {
                               <button className="node-select-button" onClick={() => this.createGrid()}>{'Create Grid'}</button>
                               <button className="node-select-button" onClick={() => this.selectNode('start')}>Select start node</button>
                               <button className="node-select-button" onClick={() => this.selectNode('last')}>Select last node</button>
+                              <button className="node-select-button" onClick={() => this.selectNode('block')}>Select blocked node</button>
+                              <button className="node-select-button" onClick={() => this.clearMaze()}>Clear Maze</button>
                               <button className="node-select-button" onClick={() => this.astarSearch()}>{'Start A* Search'}</button>
                         </div>
                         <div className="display">
@@ -173,7 +186,7 @@ class Astar extends Component {
                               <div onClick={() => this.handleModal()} className="modal">
                                     <div className="dialog">
                                           <h2>{'Please select node by clicking on grid node!'}</h2>
-                                          <button className="button" >{'OK'}</button>
+                                          <button className="button">{'OK'}</button>
                                     </div>
                               </div>
                         }
